@@ -10,15 +10,22 @@ Code's `/take-notes` skill for meeting summaries and action extraction.
 ## CLI Interface
 
 ```
-notetaker record              # Interactive recording session
-notetaker record --no-interact # Non-interactive (Ctrl+C to stop, no auto-transcribe)
+notetaker record                     # Interactive recording session
+notetaker record --no-interact       # Non-interactive (Ctrl+C to stop, no auto-transcribe)
 notetaker record --output <path>     # Override transcription output path
+notetaker record --audio-dir <path>  # Override WAV file output directory
 notetaker record --keep-audio        # Keep the WAV file after transcription
 notetaker transcribe <file>          # Transcribe an existing audio file
 notetaker transcribe <file> --output <path>
 notetaker download-model             # Download the whisper model
 notetaker download-model --model <name>  # Specify model variant
 ```
+
+- `--output` always refers to the transcription text file (interactive mode and
+  `transcribe` subcommand). Ignored in `--no-interact` mode.
+- `--audio-dir` controls where the WAV file is saved. In `--no-interact` mode
+  this is the primary output. In interactive mode it only takes effect with
+  `--keep-audio`.
 
 All CLI flags override their config file equivalents.
 
@@ -90,9 +97,9 @@ completes.
 
 1. Same recording setup but no UI — Ctrl+C triggers stop via `ctrlc` crate
    signal handler (since there is no raw terminal mode to capture key events).
-2. Saves the WAV file to the output location with timestamp-based naming
-   (e.g. `2026-03-20T14-30-00.wav`). The `--output` flag controls the WAV
-   file destination in this mode. No auto-transcribe.
+2. Saves the WAV file with timestamp-based naming (e.g.
+   `2026-03-20T14-30-00.wav`) to `--audio-dir` or the configured `output_dir`.
+   No auto-transcribe.
 
 ### Transcribe Subcommand Flow
 
