@@ -68,7 +68,11 @@ pub fn model_filename(model_name: &str) -> String {
 }
 
 pub fn expand_tilde(path: &str) -> PathBuf {
-    if let Some(rest) = path.strip_prefix("~/") {
+    if path == "~" {
+        if let Some(home) = dirs::home_dir() {
+            return home;
+        }
+    } else if let Some(rest) = path.strip_prefix("~/") {
         if let Some(home) = dirs::home_dir() {
             return home.join(rest);
         }
@@ -123,6 +127,13 @@ mod tests {
         let expanded = expand_tilde("~/transcriptions");
         assert!(!expanded.to_string_lossy().starts_with('~'));
         assert!(expanded.to_string_lossy().ends_with("transcriptions"));
+    }
+
+    #[test]
+    fn expand_bare_tilde() {
+        let expanded = expand_tilde("~");
+        assert!(!expanded.to_string_lossy().contains('~'));
+        assert!(expanded.is_absolute());
     }
 
     #[test]

@@ -7,9 +7,7 @@ use crate::cli::RecordArgs;
 use crate::config::AppConfig;
 
 pub fn timestamp_filename(extension: &str) -> String {
-    Local::now()
-        .format(&format!("%Y-%m-%dT%H-%M-%S.{extension}"))
-        .to_string()
+    format!("{}.{extension}", Local::now().format("%Y-%m-%dT%H-%M-%S"))
 }
 
 pub fn resolve_output_path(config: &AppConfig, output_override: Option<&Path>) -> PathBuf {

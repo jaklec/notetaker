@@ -54,6 +54,19 @@ fn read_wav_samples(path: &Path) -> Result<Vec<f32>> {
     let mut reader = hound::WavReader::open(path).context("Failed to open WAV file")?;
     let spec = reader.spec();
 
+    if spec.sample_rate != 16000 {
+        anyhow::bail!(
+            "Expected 16kHz WAV file, got {} Hz. Record with `notetaker record` or convert to 16kHz mono first.",
+            spec.sample_rate
+        );
+    }
+    if spec.channels != 1 {
+        anyhow::bail!(
+            "Expected mono WAV file, got {} channels. Record with `notetaker record` or convert to mono first.",
+            spec.channels
+        );
+    }
+
     let samples: Vec<f32> = match spec.sample_format {
         hound::SampleFormat::Int => reader
             .samples::<i16>()
@@ -116,6 +129,45 @@ mod tests {
         assert_eq!(samples.len(), 3);
         assert!((samples[0] - 0.0).abs() < 0.001);
         assert!((samples[1] - 1.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn read_wav_samples_rejects_wrong_sample_rate() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("test_48k.wav");
+        let spec = hound::WavSpec {
+            channels: 1,
+            sample_rate: 48000,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        };
+        let mut writer = hound::WavWriter::create(&path, spec).unwrap();
+        writer.write_sample(0i16).unwrap();
+        writer.finalize().unwrap();
+
+        let result = read_wav_samples(&path);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("16kHz"));
+    }
+
+    #[test]
+    fn read_wav_samples_rejects_stereo() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("test_stereo.wav");
+        let spec = hound::WavSpec {
+            channels: 2,
+            sample_rate: 16000,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        };
+        let mut writer = hound::WavWriter::create(&path, spec).unwrap();
+        writer.write_sample(0i16).unwrap();
+        writer.write_sample(0i16).unwrap();
+        writer.finalize().unwrap();
+
+        let result = read_wav_samples(&path);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("mono"));
     }
 
     #[test]

@@ -83,6 +83,15 @@ impl RecordingHandle {
     }
 }
 
+impl Drop for RecordingHandle {
+    fn drop(&mut self) {
+        self.stop_flag.store(true, Ordering::Relaxed);
+        if let Some(thread) = self.writer_thread.take() {
+            let _ = thread.join();
+        }
+    }
+}
+
 pub fn start_recording(recorder: Recorder) -> Result<RecordingHandle> {
     let wav_path = recorder.temp_path.clone();
     let native_rate = recorder.device_config.sample_rate().0;
@@ -190,14 +199,13 @@ pub fn start_recording(recorder: Recorder) -> Result<RecordingHandle> {
 pub fn run_non_interactive(recorder: Recorder) -> Result<PathBuf> {
     let handle = start_recording(recorder)?;
 
-    let stop_flag = std::sync::Arc::new(AtomicBool::new(false));
-    let stop_flag_clone = stop_flag.clone();
+    let stop_flag = handle.stop_flag.clone();
     ctrlc::set_handler(move || {
-        stop_flag_clone.store(true, Ordering::Relaxed);
+        stop_flag.store(true, Ordering::Relaxed);
     })?;
 
     eprintln!("Recording... Press Ctrl+C to stop.");
-    while !stop_flag.load(Ordering::Relaxed) {
+    while !handle.stop_flag.load(Ordering::Relaxed) {
         std::thread::sleep(Duration::from_millis(100));
     }
 

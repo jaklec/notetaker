@@ -69,13 +69,24 @@ fn download_file(url: &str, dest: &Path) -> Result<()> {
             .progress_chars("#>-"),
     );
 
+    let part_path = dest.with_extension("bin.part");
     let mut file = std::io::BufWriter::new(
-        std::fs::File::create(dest).context("Failed to create destination file")?,
+        std::fs::File::create(&part_path).context("Failed to create destination file")?,
     );
-    std::io::copy(&mut pb.wrap_read(response), &mut file)?;
-    pb.finish_with_message("Done");
+    let result = std::io::copy(&mut pb.wrap_read(response), &mut file);
+    drop(file);
 
-    Ok(())
+    match result {
+        Ok(_) => {
+            std::fs::rename(&part_path, dest).context("Failed to finalize downloaded file")?;
+            pb.finish_with_message("Done");
+            Ok(())
+        }
+        Err(e) => {
+            let _ = std::fs::remove_file(&part_path);
+            Err(anyhow::anyhow!(e).context("Download interrupted"))
+        }
+    }
 }
 
 #[cfg(test)]

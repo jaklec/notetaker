@@ -8,13 +8,28 @@ use crossterm::terminal;
 
 use crate::recorder::Recorder;
 
+struct RawModeGuard;
+
+impl RawModeGuard {
+    fn enable() -> Result<Self> {
+        terminal::enable_raw_mode()?;
+        Ok(Self)
+    }
+}
+
+impl Drop for RawModeGuard {
+    fn drop(&mut self) {
+        let _ = terminal::disable_raw_mode();
+    }
+}
+
 pub fn run_interactive(recorder: Recorder) -> Result<PathBuf> {
     let wav_path = recorder.wav_path().to_path_buf();
     let handle = crate::recorder::start_recording(recorder)?;
 
-    terminal::enable_raw_mode()?;
+    let _raw_guard = RawModeGuard::enable()?;
     let result = interactive_loop(&handle);
-    terminal::disable_raw_mode()?;
+    drop(_raw_guard);
 
     // Clear the status line
     eprint!("\r\x1b[K");
