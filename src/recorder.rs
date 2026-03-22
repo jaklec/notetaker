@@ -19,7 +19,7 @@ pub struct Recorder {
     device: cpal::Device,
     device_config: cpal::SupportedStreamConfig,
     temp_path: PathBuf,
-    _temp_file: tempfile::TempPath,
+    temp_file: tempfile::TempPath,
 }
 
 impl Recorder {
@@ -43,7 +43,7 @@ impl Recorder {
             device,
             device_config,
             temp_path: temp_path.to_path_buf(),
-            _temp_file: temp_path,
+            temp_file: temp_path,
         })
     }
 }
@@ -53,7 +53,7 @@ pub struct RecordingHandle {
     writer_thread: Option<std::thread::JoinHandle<Result<PathBuf>>>,
     stop_flag: std::sync::Arc<AtomicBool>,
     _stream: cpal::Stream,
-    _temp_file: tempfile::TempPath,
+    temp_file: Option<tempfile::TempPath>,
 }
 
 impl RecordingHandle {
@@ -67,11 +67,16 @@ impl RecordingHandle {
 
     pub fn stop(mut self) -> Result<PathBuf> {
         self.stop_flag.store(true, Ordering::Relaxed);
-        self.writer_thread
+        let path = self
+            .writer_thread
             .take()
             .expect("thread already joined")
             .join()
-            .map_err(|_| anyhow::anyhow!("Recording thread panicked"))?
+            .map_err(|_| anyhow::anyhow!("Recording thread panicked"))??;
+        if let Some(tf) = self.temp_file.take() {
+            tf.keep()?;
+        }
+        Ok(path)
     }
 
     pub fn is_paused(&self) -> bool {
@@ -89,7 +94,7 @@ impl Drop for RecordingHandle {
 }
 
 pub fn start_recording(recorder: Recorder) -> Result<RecordingHandle> {
-    let temp_file = recorder._temp_file;
+    let temp_file = recorder.temp_file;
     let wav_path = recorder.temp_path.clone();
     let native_rate = recorder.device_config.sample_rate().0;
     let channels = recorder.device_config.channels() as usize;
@@ -189,7 +194,7 @@ pub fn start_recording(recorder: Recorder) -> Result<RecordingHandle> {
         writer_thread: Some(writer_thread),
         stop_flag,
         _stream: stream,
-        _temp_file: temp_file,
+        temp_file: Some(temp_file),
     })
 }
 

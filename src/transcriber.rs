@@ -71,7 +71,7 @@ fn read_wav_samples(path: &Path) -> Result<Vec<f32>> {
     let samples: Vec<f32> = match spec.sample_format {
         hound::SampleFormat::Int => reader
             .samples::<i16>()
-            .map(|s| s.map(|v| v as f32 / i16::MAX as f32))
+            .map(|s| s.map(|v| v as f32 / 32768.0))
             .collect::<Result<Vec<_>, _>>()?,
         hound::SampleFormat::Float => reader.samples::<f32>().collect::<Result<Vec<_>, _>>()?,
     };

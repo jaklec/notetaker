@@ -1,4 +1,6 @@
+use std::io::Write;
 use std::path::Path;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 
@@ -51,7 +53,10 @@ pub fn download_model(model_name: &str, dest_dir: &Path) -> Result<()> {
 }
 
 fn download_file(url: &str, dest: &Path) -> Result<()> {
-    let client = reqwest::blocking::Client::new();
+    let client = reqwest::blocking::Client::builder()
+        .connect_timeout(Duration::from_secs(30))
+        .build()
+        .context("Failed to build HTTP client")?;
     let response = client
         .get(url)
         .send()
@@ -83,15 +88,16 @@ fn download_file(url: &str, dest: &Path) -> Result<()> {
         std::fs::File::create(&part_path).context("Failed to create destination file")?,
     );
     let result = std::io::copy(&mut pb.wrap_read(response), &mut file);
-    drop(file);
 
     match result {
         Ok(_) => {
+            file.flush().context("Failed to flush download buffer")?;
             std::fs::rename(&part_path, dest).context("Failed to finalize downloaded file")?;
             pb.finish_with_message("Done");
             Ok(())
         }
         Err(e) => {
+            drop(file);
             let _ = std::fs::remove_file(&part_path);
             Err(anyhow::anyhow!(e).context("Download interrupted"))
         }
