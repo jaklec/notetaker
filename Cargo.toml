@@ -1,0 +1,24 @@
+[package]
+name = "notetaker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+clap = { version = "4", features = ["derive"] }
+cpal = "0.15"
+crossterm = "0.28"
+ctrlc = "3.4"
+dirs = "6"
+hound = "3.5"
+indicatif = "0.17"
+reqwest = { version = "0.12", features = ["blocking"] }
+rubato = "0.16"
+serde = { version = "1", features = ["derive"] }
+tempfile = "3"
+toml = "0.8"
+whisper-rs = "0.14"
+
+[features]
+coreml = ["whisper-rs/coreml"]
