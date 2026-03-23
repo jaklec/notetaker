@@ -1,6 +1,12 @@
 build:
     cargo build
 
+build-release:
+    cargo build --release
+
+run *args:
+    cargo run -- {{args}}
+
 test:
     cargo test
 

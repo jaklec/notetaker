@@ -13,7 +13,9 @@
 ## Task Runner
 
 Use `just` (justfile) for all common tasks:
-- `just build` — compile the project
+- `just build` — compile the project (debug)
+- `just build-release` — compile optimized release build
+- `just run <args>` — build and run (e.g. `just run record`)
 - `just test` — run all tests
 - `just fmt` — format code with rustfmt
 - `just lint` — run clippy

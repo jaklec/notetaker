@@ -17,10 +17,12 @@ just init
 
 ## Development
 
-| Command      | Description                          |
-|--------------|--------------------------------------|
-| `just build` | Compile the project                  |
-| `just test`  | Run all tests                        |
-| `just fmt`   | Format code with rustfmt             |
-| `just lint`  | Run clippy                           |
-| `just check` | Run fmt + clippy + tests             |
+| Command              | Description                          |
+|----------------------|--------------------------------------|
+| `just build`         | Compile the project (debug)          |
+| `just build-release` | Compile optimized release build      |
+| `just run <args>`    | Build and run (e.g. `just run record`) |
+| `just test`          | Run all tests                        |
+| `just fmt`           | Format code with rustfmt             |
+| `just lint`          | Run clippy                           |
+| `just check`         | Run fmt + clippy + tests             |

@@ -2,7 +2,12 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 
-pub fn transcribe(model_path: &Path, wav_path: &Path) -> Result<String> {
+pub fn transcribe(
+    model_path: &Path,
+    wav_path: &Path,
+    single_speaker: bool,
+    language: Option<&str>,
+) -> Result<String> {
     let ctx = whisper_rs::WhisperContext::new_with_params(
         &model_path.to_string_lossy(),
         whisper_rs::WhisperContextParameters::default(),
@@ -29,7 +34,8 @@ pub fn transcribe(model_path: &Path, wav_path: &Path) -> Result<String> {
     params.set_print_special(false);
     params.set_print_realtime(false);
     params.set_print_timestamps(false);
-    params.set_language(Some("en"));
+    params.set_tdrz_enable(!single_speaker);
+    params.set_language(language);
 
     state
         .full(params, &audio_data)
@@ -187,7 +193,7 @@ mod tests {
         writer.finalize().unwrap();
 
         let model_path = Path::new("/nonexistent/model.bin");
-        let result = transcribe(model_path, &wav_path);
+        let result = transcribe(model_path, &wav_path, false, None);
         assert!(result.is_err());
     }
 }

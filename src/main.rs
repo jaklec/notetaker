@@ -13,6 +13,9 @@ use cli::{Cli, Command};
 use config::AppConfig;
 
 fn main() -> Result<()> {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
+    whisper_rs::install_logging_hooks();
+
     let cli = Cli::parse();
     let config = AppConfig::load()?.merge_cli(&cli);
 
@@ -51,7 +54,12 @@ fn cmd_record(config: &AppConfig, args: &cli::RecordArgs) -> Result<()> {
             return Ok(());
         }
 
-        let text = transcriber::transcribe(&model_path, &wav_path)?;
+        let text = transcribe_with_spinner(
+            &model_path,
+            &wav_path,
+            args.single_speaker,
+            args.language.as_deref(),
+        )?;
         let out_path = output::resolve_output_path(config, args.output.as_deref());
         output::write_transcription(&out_path, &text)?;
         println!("{}", out_path.display());
@@ -82,7 +90,12 @@ fn cmd_transcribe(config: &AppConfig, args: &cli::TranscribeArgs) -> Result<()> 
         anyhow::bail!("Audio file not found: {}", wav_path.display());
     }
 
-    let text = transcriber::transcribe(&model_path, wav_path)?;
+    let text = transcribe_with_spinner(
+        &model_path,
+        wav_path,
+        args.single_speaker,
+        args.language.as_deref(),
+    )?;
     let out_path = output::resolve_output_path(config, args.output.as_deref());
     output::write_transcription(&out_path, &text)?;
     println!("{}", out_path.display());
@@ -94,4 +107,28 @@ fn cmd_download_model(config: &AppConfig, args: &cli::DownloadModelArgs) -> Resu
     let model_name = args.model.as_deref().unwrap_or(&config.model);
     download::download_model(model_name, &config.resolved_model_dir())?;
     Ok(())
+}
+
+fn transcribe_with_spinner(
+    model_path: &std::path::Path,
+    wav_path: &std::path::Path,
+    single_speaker: bool,
+    language: Option<&str>,
+) -> Result<String> {
+    let spinner = indicatif::ProgressBar::new_spinner();
+    spinner.set_style(
+        indicatif::ProgressStyle::default_spinner()
+            .template("{spinner:.green} Transcribing...")
+            .unwrap(),
+    );
+    spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+
+    let result = transcriber::transcribe(model_path, wav_path, single_speaker, language);
+
+    match &result {
+        Ok(_) => spinner.finish_and_clear(),
+        Err(_) => spinner.finish_with_message("Transcription failed"),
+    }
+
+    result
 }

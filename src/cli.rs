@@ -36,6 +36,14 @@ pub struct RecordArgs {
     /// Keep the WAV file after transcription
     #[arg(long)]
     pub keep_audio: bool,
+
+    /// Optimize for a single speaker (disables speaker turn detection)
+    #[arg(long)]
+    pub single_speaker: bool,
+
+    /// Language code (e.g. "en", "sv"). Auto-detects if omitted
+    #[arg(long)]
+    pub language: Option<String>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -46,6 +54,14 @@ pub struct TranscribeArgs {
     /// Override transcription output path
     #[arg(long)]
     pub output: Option<PathBuf>,
+
+    /// Optimize for a single speaker (disables speaker turn detection)
+    #[arg(long)]
+    pub single_speaker: bool,
+
+    /// Language code (e.g. "en", "sv"). Auto-detects if omitted
+    #[arg(long)]
+    pub language: Option<String>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -72,7 +88,64 @@ mod tests {
                 assert!(args.output.is_none());
                 assert!(args.audio_dir.is_none());
                 assert!(!args.keep_audio);
+                assert!(!args.single_speaker);
             }
+            _ => panic!("expected Record command"),
+        }
+    }
+
+    #[test]
+    fn parse_record_single_speaker() {
+        let cli = parse(&["notetaker", "record", "--single-speaker"]);
+        match cli.command {
+            Command::Record(args) => assert!(args.single_speaker),
+            _ => panic!("expected Record command"),
+        }
+    }
+
+    #[test]
+    fn parse_transcribe_single_speaker() {
+        let cli = parse(&[
+            "notetaker",
+            "transcribe",
+            "recording.wav",
+            "--single-speaker",
+        ]);
+        match cli.command {
+            Command::Transcribe(args) => assert!(args.single_speaker),
+            _ => panic!("expected Transcribe command"),
+        }
+    }
+
+    #[test]
+    fn parse_record_with_language() {
+        let cli = parse(&["notetaker", "record", "--language", "sv"]);
+        match cli.command {
+            Command::Record(args) => assert_eq!(args.language.unwrap(), "sv"),
+            _ => panic!("expected Record command"),
+        }
+    }
+
+    #[test]
+    fn parse_transcribe_with_language() {
+        let cli = parse(&[
+            "notetaker",
+            "transcribe",
+            "recording.wav",
+            "--language",
+            "en",
+        ]);
+        match cli.command {
+            Command::Transcribe(args) => assert_eq!(args.language.unwrap(), "en"),
+            _ => panic!("expected Transcribe command"),
+        }
+    }
+
+    #[test]
+    fn parse_record_language_defaults_to_none() {
+        let cli = parse(&["notetaker", "record"]);
+        match cli.command {
+            Command::Record(args) => assert!(args.language.is_none()),
             _ => panic!("expected Record command"),
         }
     }

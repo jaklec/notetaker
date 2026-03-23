@@ -34,7 +34,6 @@ pub fn run_interactive(recorder: Recorder) -> Result<PathBuf> {
 
     match result {
         Ok(()) => {
-            eprintln!("Transcribing...");
             let wav_path = handle.stop()?;
             Ok(wav_path)
         }
