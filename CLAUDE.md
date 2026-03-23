@@ -13,6 +13,7 @@
 ## Task Runner
 
 Use `just` (justfile) for all common tasks:
+- `just install` — install to `~/.cargo/bin/`
 - `just build` — compile the project (debug)
 - `just build-release` — compile optimized release build
 - `just run <args>` — build and run (e.g. `just run record`)
