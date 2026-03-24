@@ -1,4 +1,4 @@
-# Notetaker
+# Voxscribe
 
 Record and transcribe audio locally using [whisper.cpp](https://github.com/ggerganov/whisper.cpp). No cloud services required.
 
@@ -12,23 +12,23 @@ Record and transcribe audio locally using [whisper.cpp](https://github.com/ggerg
 
 ```sh
 git clone <repo-url>
-cd notetaker
+cd voxscribe
 cargo install --path .
 ```
 
 Then download the whisper model:
 
 ```sh
-notetaker download-model
+voxscribe download-model
 ```
 
 ## Usage
 
 ```sh
-notetaker record                # interactive recording + transcription
-notetaker record --language sv  # pin language (auto-detects by default)
-notetaker record --single-speaker  # optimize for a single speaker
-notetaker transcribe audio.wav  # transcribe an existing file
+voxscribe record                # interactive recording + transcription
+voxscribe record --language sv  # pin language (auto-detects by default)
+voxscribe record --single-speaker  # optimize for a single speaker
+voxscribe transcribe audio.wav  # transcribe an existing file
 ```
 
 Transcriptions are saved to `~/transcriptions/` by default.

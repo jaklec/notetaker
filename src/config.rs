@@ -6,7 +6,7 @@ use serde::Deserialize;
 use crate::cli::Cli;
 
 const DEFAULT_OUTPUT_DIR: &str = "~/transcriptions";
-const DEFAULT_MODEL_PATH: &str = "~/.local/share/notetaker/models";
+const DEFAULT_MODEL_PATH: &str = "~/.local/share/voxscribe/models";
 const DEFAULT_MODEL: &str = "large-v3-turbo-q5_0";
 
 #[derive(Debug, Clone, Deserialize)]
@@ -84,7 +84,7 @@ fn config_file_path() -> PathBuf {
     dirs::config_dir()
         .or_else(|| dirs::home_dir().map(|h| h.join(".config")))
         .unwrap_or_else(|| PathBuf::from(".config"))
-        .join("notetaker")
+        .join("voxscribe")
         .join("config.toml")
 }
 
@@ -96,7 +96,7 @@ mod tests {
     fn default_config_has_expected_values() {
         let config = AppConfig::default();
         assert_eq!(config.output_dir, "~/transcriptions");
-        assert_eq!(config.model_path, "~/.local/share/notetaker/models");
+        assert_eq!(config.model_path, "~/.local/share/voxscribe/models");
         assert_eq!(config.model, "large-v3-turbo-q5_0");
     }
 

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-#[command(name = "notetaker", about = "Record and transcribe audio locally")]
+#[command(name = "voxscribe", about = "Record and transcribe audio locally")]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Command,
@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     fn parse_record_defaults() {
-        let cli = parse(&["notetaker", "record"]);
+        let cli = parse(&["voxscribe", "record"]);
         match cli.command {
             Command::Record(args) => {
                 assert!(!args.no_interact);
@@ -96,7 +96,7 @@ mod tests {
 
     #[test]
     fn parse_record_single_speaker() {
-        let cli = parse(&["notetaker", "record", "--single-speaker"]);
+        let cli = parse(&["voxscribe", "record", "--single-speaker"]);
         match cli.command {
             Command::Record(args) => assert!(args.single_speaker),
             _ => panic!("expected Record command"),
@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn parse_transcribe_single_speaker() {
         let cli = parse(&[
-            "notetaker",
+            "voxscribe",
             "transcribe",
             "recording.wav",
             "--single-speaker",
@@ -119,7 +119,7 @@ mod tests {
 
     #[test]
     fn parse_record_with_language() {
-        let cli = parse(&["notetaker", "record", "--language", "sv"]);
+        let cli = parse(&["voxscribe", "record", "--language", "sv"]);
         match cli.command {
             Command::Record(args) => assert_eq!(args.language.unwrap(), "sv"),
             _ => panic!("expected Record command"),
@@ -129,7 +129,7 @@ mod tests {
     #[test]
     fn parse_transcribe_with_language() {
         let cli = parse(&[
-            "notetaker",
+            "voxscribe",
             "transcribe",
             "recording.wav",
             "--language",
@@ -143,7 +143,7 @@ mod tests {
 
     #[test]
     fn parse_record_language_defaults_to_none() {
-        let cli = parse(&["notetaker", "record"]);
+        let cli = parse(&["voxscribe", "record"]);
         match cli.command {
             Command::Record(args) => assert!(args.language.is_none()),
             _ => panic!("expected Record command"),
@@ -153,7 +153,7 @@ mod tests {
     #[test]
     fn parse_record_all_flags() {
         let cli = parse(&[
-            "notetaker",
+            "voxscribe",
             "record",
             "--no-interact",
             "--output",
@@ -175,7 +175,7 @@ mod tests {
 
     #[test]
     fn parse_transcribe() {
-        let cli = parse(&["notetaker", "transcribe", "recording.wav"]);
+        let cli = parse(&["voxscribe", "transcribe", "recording.wav"]);
         match cli.command {
             Command::Transcribe(args) => {
                 assert_eq!(args.file, PathBuf::from("recording.wav"));
@@ -188,7 +188,7 @@ mod tests {
     #[test]
     fn parse_transcribe_with_output() {
         let cli = parse(&[
-            "notetaker",
+            "voxscribe",
             "transcribe",
             "recording.wav",
             "--output",
@@ -204,7 +204,7 @@ mod tests {
 
     #[test]
     fn parse_download_model_default() {
-        let cli = parse(&["notetaker", "download-model"]);
+        let cli = parse(&["voxscribe", "download-model"]);
         match cli.command {
             Command::DownloadModel(args) => {
                 assert!(args.model.is_none());
@@ -215,7 +215,7 @@ mod tests {
 
     #[test]
     fn parse_download_model_with_name() {
-        let cli = parse(&["notetaker", "download-model", "--model", "tiny"]);
+        let cli = parse(&["voxscribe", "download-model", "--model", "tiny"]);
         match cli.command {
             Command::DownloadModel(args) => {
                 assert_eq!(args.model.unwrap(), "tiny");
@@ -226,11 +226,11 @@ mod tests {
 
     #[test]
     fn missing_subcommand_is_error() {
-        assert!(Cli::try_parse_from(["notetaker"]).is_err());
+        assert!(Cli::try_parse_from(["voxscribe"]).is_err());
     }
 
     #[test]
     fn transcribe_missing_file_is_error() {
-        assert!(Cli::try_parse_from(["notetaker", "transcribe"]).is_err());
+        assert!(Cli::try_parse_from(["voxscribe", "transcribe"]).is_err());
     }
 }

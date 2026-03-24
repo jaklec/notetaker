@@ -30,7 +30,7 @@ fn cmd_record(config: &AppConfig, args: &cli::RecordArgs) -> Result<()> {
     let model_path = config.resolved_model_path();
     if !args.no_interact && !model_path.exists() {
         anyhow::bail!(
-            "Whisper model not found at {}. Run `notetaker download-model` first.",
+            "Whisper model not found at {}. Run `voxscribe download-model` first.",
             model_path.display()
         );
     }
@@ -80,7 +80,7 @@ fn cmd_transcribe(config: &AppConfig, args: &cli::TranscribeArgs) -> Result<()> 
     let model_path = config.resolved_model_path();
     if !model_path.exists() {
         anyhow::bail!(
-            "Whisper model not found at {}. Run `notetaker download-model` first.",
+            "Whisper model not found at {}. Run `voxscribe download-model` first.",
             model_path.display()
         );
     }

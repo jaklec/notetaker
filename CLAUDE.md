@@ -1,4 +1,4 @@
-# Notetaker — Development Guidelines
+# Voxscribe — Development Guidelines
 
 ## Development Process
 

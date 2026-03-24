@@ -1,4 +1,4 @@
-# Notetaker CLI — Design Spec
+# Voxscribe CLI — Design Spec
 
 ## Overview
 
@@ -10,15 +10,15 @@ Code's `/take-notes` skill for meeting summaries and action extraction.
 ## CLI Interface
 
 ```
-notetaker record                     # Interactive recording session
-notetaker record --no-interact       # Non-interactive (Ctrl+C to stop, no auto-transcribe)
-notetaker record --output <path>     # Override transcription output path
-notetaker record --audio-dir <path>  # Override WAV file output directory
-notetaker record --keep-audio        # Keep the WAV file after transcription
-notetaker transcribe <file>          # Transcribe an existing audio file
-notetaker transcribe <file> --output <path>
-notetaker download-model             # Download the whisper model
-notetaker download-model --model <name>  # Specify model variant
+voxscribe record                     # Interactive recording session
+voxscribe record --no-interact       # Non-interactive (Ctrl+C to stop, no auto-transcribe)
+voxscribe record --output <path>     # Override transcription output path
+voxscribe record --audio-dir <path>  # Override WAV file output directory
+voxscribe record --keep-audio        # Keep the WAV file after transcription
+voxscribe transcribe <file>          # Transcribe an existing audio file
+voxscribe transcribe <file> --output <path>
+voxscribe download-model             # Download the whisper model
+voxscribe download-model --model <name>  # Specify model variant
 ```
 
 - `--output` always refers to the transcription text file (interactive mode and
@@ -31,11 +31,11 @@ All CLI flags override their config file equivalents.
 
 ## Configuration
 
-File location: `~/.config/notetaker/config.toml`
+File location: `~/.config/voxscribe/config.toml`
 
 ```toml
 output_dir = "~/transcriptions"
-model_path = "~/.local/share/notetaker/models"
+model_path = "~/.local/share/voxscribe/models"
 model = "large-v3-turbo-q5_0"
 ```
 

@@ -18,7 +18,7 @@ pub fn transcribe(
     if !has_coreml_assets(model_path) {
         eprintln!(
             "Warning: CoreML model assets not found. Falling back to Metal/CPU. \
-             Run `notetaker download-model` to fetch CoreML assets for faster transcription."
+             Run `voxscribe download-model` to fetch CoreML assets for faster transcription."
         );
     }
 
@@ -63,13 +63,13 @@ fn read_wav_samples(path: &Path) -> Result<Vec<f32>> {
 
     if spec.sample_rate != 16000 {
         anyhow::bail!(
-            "Expected 16kHz WAV file, got {} Hz. Record with `notetaker record` or convert to 16kHz mono first.",
+            "Expected 16kHz WAV file, got {} Hz. Record with `voxscribe record` or convert to 16kHz mono first.",
             spec.sample_rate
         );
     }
     if spec.channels != 1 {
         anyhow::bail!(
-            "Expected mono WAV file, got {} channels. Record with `notetaker record` or convert to mono first.",
+            "Expected mono WAV file, got {} channels. Record with `voxscribe record` or convert to mono first.",
             spec.channels
         );
     }
